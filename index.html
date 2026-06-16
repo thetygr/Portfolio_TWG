@@ -931,15 +931,10 @@ window.addEventListener('scroll', () => {
   });
 }, { passive: true });
 
-// ── CONTACT FORM — Formspree ──────────────────────
-// HOW TO ACTIVATE:
-//   1. Go to https://formspree.io and sign up free
-//   2. Create a new form — set the email to tyler.gray@cuanschutz.edu
-//   3. Copy the endpoint (e.g. https://formspree.io/f/xabcdefg)
-//   4. Replace FORMSPREE_ENDPOINT below with your real endpoint
-const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xpwzgavn';
-
-async function handleSend() {
+// ── CONTACT FORM — mailto handler ─────────────────
+// Opens the visitor's native email app (Outlook, Gmail, Apple Mail, etc.)
+// with To, Subject, and Body pre-filled from the form fields.
+function handleSend() {
   const name  = document.getElementById('cf-name').value.trim();
   const email = document.getElementById('cf-email').value.trim();
   const type  = document.getElementById('cf-type').value;
@@ -950,32 +945,28 @@ async function handleSend() {
     return;
   }
 
+  const subject = encodeURIComponent(
+    type ? type + ' — Portfolio Inquiry' : 'Portfolio Inquiry'
+  );
+
+  const body = encodeURIComponent(
+    'Name: ' + name + '\n' +
+    'Email: ' + email + '\n' +
+    (type ? 'Inquiry type: ' + type + '\n' : '') +
+    '\n' + (msg || '')
+  );
+
+  window.location.href =
+    'mailto:tyler.gray@cuanschutz.edu?subject=' + subject + '&body=' + body;
+
   const btn     = document.querySelector('.send-btn');
   const confirm = document.getElementById('send-confirm');
-  btn.textContent = 'Sending...';
-  btn.disabled = true;
-
-  try {
-    const res = await fetch(FORMSPREE_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({ name, email, 'inquiry-type': type, message: msg })
-    });
-    if (res.ok) {
-      btn.textContent = 'Sent ✓';
-      confirm.style.display = 'block';
-      confirm.textContent = '✓ Message sent — I\'ll be in touch shortly.';
-    } else {
-      const data = await res.json();
-      btn.textContent = 'Send Message';
-      btn.disabled = false;
-      alert(data.error || 'Something went wrong. Please email tyler.gray@cuanschutz.edu directly.');
-    }
-  } catch (err) {
+  btn.textContent = 'Opening email app...';
+  setTimeout(() => {
     btn.textContent = 'Send Message';
-    btn.disabled = false;
-    alert('Network error. Please email tyler.gray@cuanschutz.edu directly.');
-  }
+    confirm.style.display = 'block';
+    confirm.textContent = '✓ Your email app should have opened — send when ready.';
+  }, 1500);
 }
 </script>
 </body>
